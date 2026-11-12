@@ -1,0 +1,37 @@
+' VWG Dispatcher lifecycle controls - manual start by default.
+Option Explicit
+
+' Keep this False to prevent Outlook launching the dispatcher automatically.
+' Start it deliberately with StartVWGAssignmentDispatcher after opening Outlook.
+Private Const VWG_AUTO_START_ON_OUTLOOK_LAUNCH As Boolean = False
+
+Private Sub Application_Startup()
+    If Not VWG_AUTO_START_ON_OUTLOOK_LAUNCH Then
+        Debug.Print "[VWG LIFECYCLE] Outlook opened; dispatcher left stopped (manual-start mode)."
+        Exit Sub
+    End If
+
+    On Error GoTo StartupFailed
+    modVWGDispatcher.StartDispatcher
+    Exit Sub
+
+StartupFailed:
+    Debug.Print "[VWG LIFECYCLE] Application_Startup could not start dispatcher | " & _
+                CStr(Err.Number) & " - " & Err.Description
+End Sub
+
+' Manual start. Safe to invoke more than once; the dispatcher lifecycle guard
+' ignores a second start while startup is running or after it is already active.
+Public Sub StartVWGAssignmentDispatcher()
+    modVWGDispatcher.StartDispatcher
+End Sub
+
+' Manual stop. This disables all event/timer processing for the current session.
+Public Sub StopVWGAssignmentDispatcher()
+    modVWGDispatcher.StopDispatcher
+End Sub
+
+' Manual recovery/queue scan.
+Public Sub RunVWGRecoveryScan()
+    modVWGDispatcher.RunQueueAndRecoveryScan
+End Sub
